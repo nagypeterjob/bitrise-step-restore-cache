@@ -12,9 +12,13 @@ import (
 )
 
 type Input struct {
-	Verbose        bool   `env:"verbose,required"`
-	Key            string `env:"key,required"`
-	NumFullRetries int    `env:"retries,required"`
+	Verbose            bool            `env:"verbose,required"`
+	Key                string          `env:"key,required"`
+	NumFullRetries     int             `env:"retries,required"`
+	AWSBucket          string          `env:"aws_bucket"`
+	AWSRegion          string          `env:"aws_region"`
+	AWSAccessKeyID     stepconf.Secret `env:"aws_access_key_id"`
+	AWSSecretAccessKey stepconf.Secret `env:"aws_secret_access_key"`
 }
 
 type RestoreCacheStep struct {
@@ -52,9 +56,13 @@ func (step RestoreCacheStep) Run() error {
 	step.logger.EnableDebugLog(input.Verbose)
 
 	return cache.NewRestorer(step.envRepo, step.logger, step.commandFactory).Restore(cache.RestoreCacheInput{
-		StepId:         "restore-cache",
-		Verbose:        input.Verbose,
-		Keys:           strings.Split(input.Key, "\n"),
-		NumFullRetries: input.NumFullRetries,
+		StepId:             "restore-cache",
+		Verbose:            input.Verbose,
+		Keys:               strings.Split(input.Key, "\n"),
+		NumFullRetries:     input.NumFullRetries,
+		AWSBucket:          input.AWSBucket,
+		AWSRegion:          input.AWSRegion,
+		AWSAccessKeyID:     string(input.AWSAccessKeyID),
+		AWSSecretAccessKey: string(input.AWSSecretAccessKey),
 	})
 }
